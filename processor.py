@@ -415,7 +415,7 @@ def get_text_from_document(file_bytes: bytes, filename: str) -> str:
 
     - Detects whether the content is PDF or image using:
         * PDF header (%PDF-) OR .pdf extension
-        * Standard image type detection (imghdr)
+        * Common image file extensions for JPEG/PNG/TIFF/BMP/GIF
     - Routes to the appropriate extraction function.
     - If detection is ambiguous, defaults to the PDF pipeline because
       most uploads in this app are invoice PDFs.
@@ -428,9 +428,8 @@ def get_text_from_document(file_bytes: bytes, filename: str) -> str:
     if is_pdf_header or ext == ".pdf":
         return get_text_from_pdf(file_bytes, filename)
 
-    # Image type detection
-    img_kind = imghdr.what(None, h=file_bytes)
-    if img_kind in {"jpeg", "png", "tiff", "bmp", "gif"}:
+    # Image type detection via filename extension (imghdr was removed in Python 3.13)
+    if ext in {".jpg", ".jpeg", ".png", ".tif", ".tiff", ".bmp", ".gif"}:
         return get_text_from_image(file_bytes, filename)
 
     # Ambiguous: try PDF pipeline first, then fall back to image logic if that fails
